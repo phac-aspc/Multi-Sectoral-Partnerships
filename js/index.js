@@ -1,8 +1,33 @@
-function reduceCollisions(target){
+function displayDetails(data, x){
+
+    document.getElementById("default").style.display = "none";
+    
+    var detailsElement = document.getElementById("selection");
+    var detailsString = '<div class="project">';
+    
+    detailsString += '<div id="title-container">';
+        
+    detailsString += '<h3 id="title">' + data["Project Name"] + '</h3>';
+    detailsString += '</div>';
+            
+    detailsString += '<div class="amount"></div>';
+            
+    detailsString += '<p id="description">' + data['Description'] + "</p>";
+
+    detailsString += '</div>';
+    
+    detailsElement.innerHTML += detailsString;
+    
+    var amounts = document.getElementsByClassName("amount");
+    
+    drawBar(amounts[0], x, +data["Funding Amount"].replace("$", "").replace(",", "").replace(",", ""));
+}
+
+function reduceCollisions(target, max){
     // REMINDER: add cx and cy values to the transform to get the real position
     
     var circles = target.selectAll('circle');
-
+    d3.selectAll('.group').remove();
     // NEW optimized D3 code
     // var groups = [];
     // circles.each(function(d){
@@ -143,11 +168,47 @@ function reduceCollisions(target){
         var ax = Math.floor(xsum/groups[i].length);
         var ay = Math.floor(ysum/groups[i].length);
         
+        var data = [];
+        
         for (var g=0;g<groups[i].length;g++){
-            groups[i][g].attributes.transform.value = "translate(" + ax + "," + ay + ")";
+            d3.select(groups[i][g]).attr("display", "none").each(function(d){
+                data[data.length] = d;
+            });
+            // groups[i][g].attributes.transform.value = "translate(" + ax + "," + ay + ")";
         }
         
-        d3.select('svg').append('circle').attr("r", 10).attr("transform", "translate(" + ax + "," + ay + ")").style("fill", "green");
+        
+        
+        var grouping = d3.select('svg')
+            .datum(data)
+            .append('g')
+            .attr("transform", "translate(" + ax + "," + ay + ")")
+            .attr('class', 'group')
+            .on('mouseover', function(d){
+                document.getElementById('selection').innerHTML = "";
+                for (var i=0;i<d.length;i++){
+                    console.table(d[i]);
+                    
+                    var xScale = d3.scaleLinear()
+                            .range([0, $(".amount").width() - 150])
+                            .domain([0, max]);
+                    displayDetails(d[i], xScale);
+                }
+            });
+        
+        grouping
+            .append('circle')
+            .attr("r", 10)
+            .style("fill", "#e74c3c")
+            .attr("pointer-events", "visible")
+        
+        grouping.append("text")
+            .attr("text-anchor", "middle")
+            .attr("y", 3)
+            .style("fill", "#fff")
+            .text(function(d){
+                return d.length;
+            });
     }
 }
 
@@ -190,7 +251,9 @@ d3.csv("./data/partnerships.csv", function(csv) {
         findLocation(data[i]["Headquarters"], function(coordinates) {
             // adds the coordinates to draw
             coords.push(new L.LatLng(coordinates[1] + Math.random() / 10, coordinates[0] + Math.random() / 10));
-
+            
+            target.selectAll('.headquarter').attr("display", "inline");
+            
             // only execute at the last data point
             if (coords.length == data.length) {
                 var circles = target.selectAll("circle")
@@ -211,7 +274,7 @@ d3.csv("./data/partnerships.csv", function(csv) {
                     .attr("opacity", 1)
                     .attr("pointer-events", "visible");
                 
-                reduceCollisions(target);
+                reduceCollisions(target, max);
                 
                 // create the bar chart svg
                 d3.select("#amount")
@@ -223,30 +286,38 @@ d3.csv("./data/partnerships.csv", function(csv) {
                 circles.on("mouseover", function(d) {
                     document.getElementById("default").style.display = "none";
                     
-                    d3.select(this)
-                        .style("fill", "#2980b9");
+                    document.getElementById('selection').innerHTML = '';
                     
-                    if (selectedProject == null) {
-                        document.getElementById("title").textContent = d["Project Name"];
-                        document.getElementById("description").textContent = d["Description"];
-
-                        var xScale = d3.scaleLinear()
+                    var xScale = d3.scaleLinear()
                             .range([0, $("#amount").width() - 150])
                             .domain([0, max]);
+                    
+                    displayDetails(d, xScale);
+                    
+                    // d3.select(this)
+                    //     .style("fill", "#2980b9");
+                    
+                    // if (selectedProject == null) {
+                    //     document.getElementById("title").textContent = d["Project Name"];
+                    //     document.getElementById("description").textContent = d["Description"];
 
-                        drawBar("#bar-chart", xScale, +d["Funding Amount"].replace("$", "").replace(",", "").replace(",", ""));
+                    //     var xScale = d3.scaleLinear()
+                    //         .range([0, $("#amount").width() - 150])
+                    //         .domain([0, max]);
 
-                        // adding partners
-                        var partners = d["Partners"].split(/,|;/);
+                    //     drawBar("#bar-chart", xScale, +d["Funding Amount"].replace("$", "").replace(",", "").replace(",", ""));
 
-                        var partnersDiv = document.getElementById("partners");
+                    //     // adding partners
+                    //     var partners = d["Partners"].split(/,|;/);
+
+                    //     var partnersDiv = document.getElementById("partners");
                         
-                        partnersDiv.innerHTML = '<h4>Match Funding Partners</h4>';
+                    //     partnersDiv.innerHTML = '<h4>Match Funding Partners</h4>';
                         
-                        for (var i = 0; i < partners.length; i++) {
-                            partnersDiv.innerHTML += '<div class="partner" id="P' + i + '">' + partners[i].trim() + "</div>";
-                        }
-                    }
+                    //     for (var i = 0; i < partners.length; i++) {
+                    //         partnersDiv.innerHTML += '<div class="partner" id="P' + i + '">' + partners[i].trim() + "</div>";
+                    //     }
+                    // }
 
                 });
 
@@ -282,18 +353,18 @@ d3.csv("./data/partnerships.csv", function(csv) {
                             .range([0, $("#amount").width() - 150])
                             .domain([0, max]);
 
-                        drawBar("#bar-chart", xScale, +d["Funding Amount"].replace("$", "").replace(",", "").replace(",", ""));
+                        // drawBar("#bar-chart", xScale, +d["Funding Amount"].replace("$", "").replace(",", "").replace(",", ""));
                     }
                 });
                 
                 map.on("zoomend", function() {
                     circles
+                        .attr("display", "inline")
                         .attr("transform", function(d, k) {
                         var point = map.latLngToLayerPoint(coords[k]);
                         // console.log('doing');
                         return "translate(" + point.x + "," + point.y + ")";
                     });
-                    // console.log('done');
                     reduceCollisions(target);
                 });
             }
