@@ -5,38 +5,57 @@
     <meta content="width=device-width,initial-scale=1" name="viewport">
     <link href="./GCWeb/assets/favicon.ico" rel="icon" type="image/x-icon">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="./GCWeb/css/wet-boew.min.css">
     <link rel="stylesheet" href="./GCWeb/css/theme.min.css">
     <link rel="stylesheet" href="./dependencies/leaflet.css">
+    
     <noscript><link rel="stylesheet" href="./wet-boew/css/noscript.min.css" /></noscript>
     
     <title></title>
     <style type="text/css">
-        html{
-            scroll-behavior: smooth;
-        }
-        
         .map {
             height: 500px;
             margin: 30px 0;
         }
         
+        #project-list {
+            padding: 0;
+            margin: 0;
+        }
+        
+        h3 {
+            margin: 0;
+        }
+        .project {
+            list-style-type: none;
+            margin-bottom: 20px;
+        }
+        
         .headquarter:hover{
-            cursor: pointer;
+            cursor: default;
+        }
+        
+        .intersection:hover{
+            cursor: default;
         }
         
         /*#information{*/
         /*    min-height: 300px;*/
         /*}*/
+
+        /*#title-container{*/
+        /*    height: 50px;*/
+        /*}*/
         
-        #title-container{
-            height: 50px;
+        #title {
+            margin: 0;
         }
         
         #title{
-            display: table-cell;
-            height: inherit;
-            vertical-align: bottom;
+            /*display: table-cell;*/
+            /*height: inherit;*/
+            margin-bottom: 5px;
+            /*vertical-align: bottom;*/
         }
         
         .partner{
@@ -64,7 +83,76 @@
         .amount {
             margin: 20px 0;
         }
+        
+        .leaflet-left>.leaflet-control {
+            margin: 0;
+        }
+        
+        #controls {
+            margin-top: 10px;
+        }
+        
+        #controls>p{
+            margin: 10px 0;
+        }
+        
+        #information{
     
+        }
+        
+        .controls {
+            height: 100px;
+        }
+        
+        hr {
+            border-top: 1px solid black;
+        }
+        
+        label {
+            text-transform: capitalize;
+        }
+        
+        #targetPopulation {
+            width: 350px;
+        }
+        
+        sup {
+            color: #e67e22;
+        }
+        
+        option, select {
+            text-transform: capitalize;
+        }
+        
+        .project {
+            margin: 20px 0;
+        }
+        
+        #information>p {
+            margin: 0;
+        }
+        
+        .sorting {
+            margin-bottom: 20px;
+        }
+        
+        .summary-stat {
+            /*float: right;*/
+            display: block;
+            font-weight: bold;
+        }
+        
+        #summary>div {
+            margin: 20px 0;
+        }
+        
+        #summary {
+            height: 100%;
+        }
+        
+        .selection {
+            margin: 20px 0;
+        }
     </style>
 </head>
 
@@ -138,38 +226,77 @@
         </nav>
     </header>
     <main property="mainContentOfPage" class="container">
-        <h1>Multi-Sectoral Partnerships</h1>
-        
-        <p>
-            Lorem ipsum dolor sit amet, his no fastidii voluptatum theophrastus, ius et inani necessitatibus. Nec agam labitur interesset ei. Eius aeterno euismod ei quo, essent possim debitis ut sed, an iisque noluisse imperdiet qui. Id sed paulo imperdiet percipitur.
-
-            In affert apeirian lucilius vix, odio audiam pri ne. Possit sensibus voluptaria mea te, no pri elit doming euismod. Probo lobortis instructior usu te, doming vulputate at quo, altera saperet impedit vis et. Sonet impedit deterruisset eam ut, ea vim amet perpetua consequat.
+        <section class="alert alert-warning">
+            <h3>In development</h3>
+            <p> Some features may not be stable or functioning while this project is in the development stage</p>
+        </section>
+        <h1>Multi-Sectoral Partnerships <sup>Prototype</sup></h1>
+       <div class="row">
+            <div class="col-lg-8 col-md-12" id="blog">
+            <p>
+                Lorem ipsum dolor sit amet, his no fastidii voluptatum theophrastus, ius et inani necessitatibus. Nec agam labitur interesset ei. Eius aeterno euismod ei quo, essent possim debitis ut sed, an iisque noluisse imperdiet qui. Id sed paulo imperdiet percipitur.
+    
+                In affert apeirian lucilius vix, odio audiam pri ne. Possit sensibus voluptaria mea te, no pri elit doming euismod. Probo lobortis instructior usu te, doming vulputate at quo, altera saperet impedit vis et. Sonet impedit deterruisset eam ut, ea vim amet perpetua consequat.
+                
+                Ne eros graece recteque pro, te tacimates consequat democritum his, nec ne enim congue viderer. Dicat adipisci quaerendum id vix. Blandit imperdiet sed ei. Eum reque omnes eu, viris assentior accommodare ex quo, rebum probatus sit ne.
+             </p>
+            </div>
             
-            Ne eros graece recteque pro, te tacimates consequat democritum his, nec ne enim congue viderer. Dicat adipisci quaerendum id vix. Blandit imperdiet sed ei. Eum reque omnes eu, viris assentior accommodare ex quo, rebum probatus sit ne.
-            
-            Solum nostrum adipisci ad vim, iusto adversarium in per. Cu nec tacimates suavitate repudiare, usu ne clita aliquip atomorum. At sea enim omnis deterruisset, mei id error mediocrem prodesset. Ut sea magna aeque graeco, utamur moderatius et sea, cum incorrupte instructior an. Per in movet admodum, ea iudico nonumes disputando est.
-            
-            Dolore recusabo an eos, at eum vitae graeci. Mei vidit eirmod diceret ex, cu qui porro sensibus, ea nam nihil putant similique. Consul facilisi efficiantur ad pri, id cum facilisi gloriatur. Sea ut nisl choro. In nam clita iudico, tota inermis assentior an nec, no saepe oblique veritus sed.
-        </p>
-
-        <div id="funding-map" class="map col-12">
-                
-        </div>
-        
-        <div id="information">
-            <h3 id="default">^ Select a project from the map ^</h3>
-            <div id="selection">
-                <!--<div id="title-container">-->
-                <!--    <h3 id="title"></h3>-->
-                <!--</div>-->
-                
-                <!--<div id="amount"></div>-->
-                
-                <!--<p id="description"></p>-->
-                
-                <!--<div id="partners"></div>-->
+            <div class="col-lg-4 col-md-12 alert alert-info" id="summary">
+                <h3>Summary</h3>
+                <div>
+                   Number of projects: <span class="summary-stat" id="projectCount"></span>
+                </div>
+                <div>
+                    Total amount funded: <span class="summary-stat" id="totalAmount"></span>
+                </div>
+                <div>
+                    Average: <span class="summary-stat" id="average"></span>
+                </div>
             </div>
         </div>
+        <div id="funding-map" class="map col-xs-12"></div>
+        <div class="selection" id="mainSelection">
+            <p>Select a project from the map</p>
+        </div>
+        <hr>
+        <div class="row">
+            <div id="controls" class="col-lg-2 col-md-12 col-sm-12 " >
+                <label>Sort by:</label>
+                <br>
+                <div class="btn-group">
+                    <button class="btn btn-default sort active" id="alphabeticalSort" type="button" >
+                        <i class="fas fa-sort-alpha-down"></i>
+                    </button>
+
+                    <button class="btn btn-default sort" id="amountSort" type="button" >
+                        <i class="fas fa-dollar-sign"></i>
+                    </button>
+                </div>
+                <br>
+                <label for="age">Age</label>
+                <select class="form-control" id="age">
+                    <option value="all" selected>all</option>
+                    <option value="infants">infants</option>
+                    <option value="children">children</option>
+                    <option value="youth">youth</option>
+                    <option value="adult">adult</option>
+                    <option value="olderAdults">older adult</option>
+                </select>
+                <br>
+                <label for="gender">Gender</label>
+                <select class="form-control" id="gender">
+                    <option value="all" selected>all</option>
+                    <option value="male">male</option>
+                    <option value="female">female</option>
+                </select>
+            </div>
+            <div id="information" class="col-lg-10 col-md-12 col-sm-12">
+                <p><span id='results-count'>0</span> Result<span id='results-plural'>s</span></p>
+                <ul id="project-list"></ul>
+            </div>
+        </div>
+        
     </main>
     <footer id="wb-info">
         <div class="landscape">
@@ -212,17 +339,21 @@
         </div>
     </footer>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.js"></script>
+    <script src="https://pagination.js.org/dist/2.1.4/pagination.min.js"></script>
+    
     <script src="./wet-boew/js/wet-boew.min.js"></script>
     <script src="./GCWeb/js/theme.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-    
+
     <!-- D3 -->
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="https://d3js.org/topojson.v1.min.js"></script>
-    
+    <!--<script type="text/javascript" src="./dependencies/d3-circleCollision.min.js"></script>-->
+    <script type="text/javascript" src="./d3-circleCollision.min.js"></script>
     <!-- map stuff --> 
     <script src="./dependencies/leaflet.js"></script>
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.min.js"></script>
+
     <!-- My scripts -->
     <script src="./js/charts/barchart.js"></script>
     <script src="./js/tools/geotool.js"></script>

@@ -1,380 +1,568 @@
-function displayDetails(data, x){
-
-    document.getElementById("default").style.display = "none";
+function drawBar(target, xScale, value) {
+    var svg = target.append('svg').attr('height', 40).attr("width", $("#information").width());
+    var formatter = d3.format(",");
     
-    var detailsElement = document.getElementById("selection");
-    var detailsString = '<div class="project">';
+    svg.append('g')
+        .attr('class', 'bar')
+        .append('rect');
     
-    detailsString += '<div id="title-container">';
-        
-    detailsString += '<h3 id="title">' + data["Project Name"] + '</h3>';
-    detailsString += '</div>';
-            
-    detailsString += '<div class="amount"></div>';
-            
-    detailsString += '<p id="description">' + data['Description'] + "</p>";
-
-    detailsString += '</div>';
+    svg.select('.bar')
+        .append('text')
+        .attr('dy', '1.2em')
+        .attr('text-anchor', 'right');
     
-    detailsElement.innerHTML += detailsString;
+    svg.selectAll('.bar')
+        .select('rect')
+        .style('fill', '#ffa502')
+        .transition()
+            .duration(1000)
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr('width', function(d){ return xScale(d["Funding Amount"].replace(/[,$]/g, "")); })
+            .attr('height', 40);
     
-    var amounts = document.getElementsByClassName("amount");
-    
-    drawBar(amounts[0], x, +data["Funding Amount"].replace("$", "").replace(",", "").replace(",", ""));
+    svg.select('.bar')
+            .select('text')
+            .transition()
+            .duration(1000)
+            .tween("text", function(d){
+                var el = d3.select(this);
+                var interpolator = d3.interpolate(el.text().replace(/[,$]/g, ""), +d["Funding Amount"].replace(/[,$]/g, ""));
+                return function(t){
+                    el.text("$" + formatter(interpolator(t).toFixed(0)));
+                };
+            })
+            .attr("x", function(d){return xScale(d["Funding Amount"].replace(/[,$]/g, "")) + 10;});
 }
 
-function reduceCollisions(target, max){
-    // REMINDER: add cx and cy values to the transform to get the real position
+function selectProject(data, xScale) {
+    var selectionDiv = d3.select('#mainSelection').datum(data).html("");
+    console.log(selectionDiv);
     
-    var circles = target.selectAll('circle');
-    d3.selectAll('.group').remove();
-    // NEW optimized D3 code
-    // var groups = [];
-    // circles.each(function(d){
-    //     var firstNode = this;
-
-    //     var transformVal = d3.select(firstNode).attr("transform");
-        
-    //     var transValues_1 = transformVal.substring(10, transformVal.length-1).split(',');
-    //     var radius_1 = +d3.select(firstNode).attr("r");
-        
-    //     var x1 = +transValues_1[0];
-    //     var y1 = +transValues_1[1];
-
-    //     circles.each(function(n){
-    //         var secondNode = this;
-            
-    //         transformVal = d3.select(secondNode).attr("transform");
-    //         var transValues_2 = transformVal.substring(10, transformVal.length-1).split(',');
-    //         var radius_2 = +d3.select(secondNode).attr("r");
-            
-    //         var x2 = +transValues_2[0];
-    //         var y2 = +transValues_2[1];
-            
-    //         var dx = x1-x2;
-    //         var dy = y1-y2;
-            
-    //         var distance = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
-            
-    //         // if there's a collision
-    //         if (radius_1 + radius_2 >= distance){
-    //             var addToGroup = false;
-    //             var groupIndex = null;
-
-    //             for (var g=0;g<groups.length;g++){
-    //                 if (groups[g].includes(firstNode)){
-    //                     addToGroup = true;
-    //                     groupIndex = g;
-    //                 }
-    //             }
-    //             if (addToGroup){
-    //                 if (!groups[groupIndex].includes(secondNode))
-    //                     groups[groupIndex].push(secondNode);
-    //             } else {
-    //                 if (firstNode != secondNode)
-    //                     groups.push([firstNode, secondNode]);
-    //             }
-    //         }
-    //     });
-    // });
+    selectionDiv.append('h3').html(function(d) {
+        return d["Project"];    
+    });
     
-    // console.log(groups);
-    var nodes = circles._groups[0];
-    var groups = [];
+    var amount = selectionDiv.append('div').attr('class', 'amount');
+    drawBar(amount, xScale, +data["Funding Amount"].replace(/[,$]/g, ""));
     
-    // collision detection
-    for (var i=0; i< nodes.length; i++){
-        var transformValue = nodes[i].attributes.transform.value;
-        
-        var transformValues = transformValue.substring(10, transformValue.length-1).split(',');
-        
-        var x1 = +transformValues[0];
-        var y1 = +transformValues[1];
+    selectionDiv.append('p')
+        .html(function(d) {
+            return d["Purpose of Project"];
+        });
+    
+    var affectedAreas = data["Delivery Location"].replace(/[" "]/g, "").split(",");
+    
+    for (var i=0;i<affectedAreas.length;i++){
+        d3.select("#" + affectedAreas[i]).style("opacity", 0.5);
+    }
+}
 
-        for (var k=0;k<nodes.length; k++){
-            var group = [];
-            var transformValue2 = nodes[k].attributes.transform.value;
+function details(data, xScale) {
+     for (var d=0;d<data.length; d++) {
+        var item = list
+            .datum(data[d])
+            .append('li')
+            .attr("id", "projectResult" + d)
+            .attr("class", "selected-project")
+            .style("padding-left", "10px");
+        
+        // adding the project title to the list item
+        item.append('h3')
+            .html(function(k) {
+                return k["Project"];
+            });
+
+        var amount = item.append('div')
+            .attr('class', 'amount');
             
-            var transformValues2 = transformValue2.substring(10, transformValue.length-1).split(',');
+        drawBar(amount, xScale, +data[d]["Funding Amount"].replace(/[,$]/g, ""));
+        // item.appendChild(amount);
+
+        // adding tyhe project purpose
+        item.append('p')
+            .html(function(k) {
+                console.log(k);
+                return k['Purpose of Project']; 
+            });
+     }
+}
+
+function template(data, colors, xScale) {
+    var list = d3.select('#project-list').html("");
+
+    for (var d=0;d<data.length; d++) {
+        var item = list
+            .datum(data[d])
+            .append('li')
+            .attr("id", "projectResult" + d)
+            .attr("class", "project")
+            .style("border-left", "5px solid" + colors[d])
+            .style("padding-left", "10px");
+        
+        // adding the project title to the list item
+        item.append('h3')
+            .html(function(k) {
+                return k["Project"];
+            });
+
+        var amount = item.append('div')
+            .attr('class', 'amount');
             
-            var x2 = +transformValues2[0];
-            var y2 = +transformValues2[1];
+        drawBar(amount, xScale, +data[d]["Funding Amount"].replace(/[,$]/g, ""));
+        // item.appendChild(amount);
+
+        // adding tyhe project purpose
+        item.append('p')
+            .html(function(k) {
+                console.log(k);
+                return k['Purpose of Project']; 
+            });
+
+        // var description = document.createElement("p");
+        // description.textContent = data[d]['Purpose of Project'];
+        // item.appendChild(description);
+
+        // partners div
+        // var partners = data[d]["Partners"].split(/[,;]/);
+     
+        // if (!(partners.length == 1 && partners[0] == "")) {
             
-            // check the distance to each other
-            var dx = Math.pow(x1-x2, 2);
-            var dy = Math.pow(y1-y2, 2);
+        //     var partnersDiv = document.createElement('details');
+        //     partnersDiv.setAttribute("class", "acc-group off wb-lbx");
             
-            var distance = Math.sqrt(dx + dy);
             
-            // debugging
-            // if (i==0 && k==1){
-            //     console.log("x1: " + x1);
-            //     console.log("x2: " + x2);
-            //     console.log("y1: " + y1);
-            //     console.log("y2: " + y2);
-            //     console.log(x1-x2);
-            //     console.log(dx);
-            //     console.log(dy);
-            //     console.log(nodes[i], nodes[k]);
-            //     console.log("Distance: " + distance);
-            // }
+        //     var partnersTitle = document.createElement('summary');
+        //     partnersTitle.textContent = 'Partners';
+        //     partnersTitle.setAttribute("class", "tgl-tab wb-init wb-toggle-inited");
             
-            if (20 >= distance){
-                // console.log(distance);
-                var addToGroup = false;
-                var groupIndex = 0;
-                
-                for (var g=0;g<groups.length;g++){
-                    // console.log(groups[g]);
-                    if (groups[g].includes(nodes[i])){
-                        addToGroup = true;
-                        groupIndex = g;
-                        // groups[g].push(nodes[k]);
-                    }  
-                } 
-                
-                if (addToGroup){
-                    if (!groups[groupIndex].includes(nodes[k])){
-                        groups[groupIndex].push(nodes[k]);
-                    }
-                } else {
-                    if (nodes[k] != nodes[i]){
-                        group[0] = nodes[i];
-                        group[1] = nodes[k];
-                        groups.push(group);
-                    }
-                }
+        //     partnersDiv.appendChild(partnersTitle);
+            
+        //     for (var p=0;p<partners.length;p++){
+        //         var partnerBox = document.createElement('div');
+        //         partnerBox.setAttribute('class', 'partner');
+        //         partnerBox.textContent = partners[p];
+        //         partnersDiv.appendChild(partnerBox);
+        //     }
+            
+        //     item.appendChild(partnersDiv);
+        // }
+       
+        
+        // var link = document.createElement("a");
+        // link.setAttribute("href", data[d]['Website']);
+        // link.setAttribute("target", "_blank");
+        // link.textContent = data[d]["Website"];
+        // item.appendChild(link);
+        
+        // list.appendChild(item);
+    }
+}
+
+function addCoordinates(pointsToProcess, callback){
+    var pointsProcessed = [];
+    function process(point, callback) {
+        var request = new XMLHttpRequest();
+        request.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var data = JSON.parse(request.responseText);
+                var coordinates = data[0].geometry.coordinates;
+                point.coordinates = new L.LatLng(coordinates[1], coordinates[0]);
+                callback(point);
             }
-        }
+        };
+        request.open("GET", "https://www.geogratis.gc.ca/services/geolocation/en/locate?q=" + point["Address"], true);
+        request.send();
     }
     
-    // console.log(groups);
-    
-    console.log(groups);
-    
-    // drawing the new circles
-    for (var i=0;i<groups.length;i++){
-        var xsum = 0;
-        var ysum = 0;
-        
-        for (var g=0;g<groups[i].length;g++){
-            var transformValue = groups[i][g].attributes.transform.value;
-            var values = transformValue.substring(10, transformValue.length-1).split(',');
-            
-            xsum += parseInt(values[0]);
-            ysum += parseInt(values[1]);
-        }
-
-        var ax = Math.floor(xsum/groups[i].length);
-        var ay = Math.floor(ysum/groups[i].length);
-        
-        var data = [];
-        
-        for (var g=0;g<groups[i].length;g++){
-            d3.select(groups[i][g]).attr("display", "none").each(function(d){
-                data[data.length] = d;
-            });
-            // groups[i][g].attributes.transform.value = "translate(" + ax + "," + ay + ")";
-        }
-        
-        
-        
-        var grouping = d3.select('svg')
-            .datum(data)
-            .append('g')
-            .attr("transform", "translate(" + ax + "," + ay + ")")
-            .attr('class', 'group')
-            .on('mouseover', function(d){
-                document.getElementById('selection').innerHTML = "";
-                for (var i=0;i<d.length;i++){
-                    console.table(d[i]);
-                    
-                    var xScale = d3.scaleLinear()
-                            .range([0, $(".amount").width() - 150])
-                            .domain([0, max]);
-                    displayDetails(d[i], xScale);
-                }
-            });
-        
-        grouping
-            .append('circle')
-            .attr("r", 10)
-            .style("fill", "#e74c3c")
-            .attr("pointer-events", "visible")
-        
-        grouping.append("text")
-            .attr("text-anchor", "middle")
-            .attr("y", 3)
-            .style("fill", "#fff")
-            .text(function(d){
-                return d.length;
-            });
-    }
+    pointsToProcess.forEach(function(el){
+       process(el, function(newPoint){
+            pointsProcessed.push(newPoint);
+           
+            if (pointsProcessed.length == pointsToProcess.length) {
+                callback(pointsProcessed);
+            }
+       }); 
+    });
 }
 
-d3.csv("./data/partnerships.csv", function(csv) {
-    var data = csv;
+function renderData(data, colors, xScale, map) {
+    $("#information").pagination({
+            dataSource: data,
+            pageSize: 4,
+            pageRange: 9999,
+            prevText: "Previous",
+            nextText: "Next",
+            className: "paginationHeight",
+            ulClassName: "pagination",
+            callback: function(data, pagination) {
+                template(data, colors, xScale);
+            },
+            afterPaging: function() {
+                d3.select('.paginationjs-next').select('a').attr('rel', 'next');
+                d3.select('.paginationjs-prev').select('a').attr('rel', 'prev');
+                
+                
+            }
+        }); 
+    d3.select('.paginationjs-next').select('a').attr('rel', 'next');
+    d3.select('.paginationjs-prev').select('a').attr('rel', 'prv');
+    $("#results-count").text(data.length);
+}
+
+function age(lowerBound, upperBound) {
+    lowerBound = lowerBound == "All" ? 0 : +lowerBound;
+    upperBound = upperBound == "All" ? 300 : +upperBound;
+    let ageGroups = {
+        "infants": {
+            "lower": 0,
+            "higher": 4
+        },
+        "children": {
+            "lower": 5,
+            "higher": 11
+        },
+        "youth": {
+            "lower": 11,
+            "higher": 17
+        },
+        "adult": {
+            "lower": 18,
+            "higher": 64
+        },
+        "olderAdults": {
+            "lower": 65,
+            "higher": 300
+        }
+    };
+    
+    let results = [];
+    for (let ageGroup of Object.keys(ageGroups)) {
+        let group = ageGroups[ageGroup];
+        
+        if (lowerBound >= group["lower"] && lowerBound <= group["higher"])
+            results.push(ageGroup);
+        else if (upperBound <= group["higher"] && upperBound >= group["lower"]) 
+            results.push(ageGroup);
+        else if (lowerBound <= group["lower"] && upperBound >= group["higher"])
+            results.push(ageGroup);
+    }
+    return results;
+}
+
+function filterByAge(data, age) {
+    let filteredData = data.filter(function(el) {
+        return el["ageGroups"].includes(age) || age.toLowerCase() == "all";
+    });
+    
+    return filteredData;
+}
+
+function filterByGender(data, gender) {
+    let filteredData = data.filter(function(el) {
+        return el["Gender"].toLowerCase() == gender || el["Gender"].toLowerCase() == "all" || gender.toLowerCase() == "all";
+    });
+    
+    return filteredData;
+}
+
+d3.csv("./data/partnerships_v5.csv", function(csv) {
+    var provinceLookup = {
+        "Quebec": "QC",
+        "Newfoundland and Labrador": "NL",
+        "British Colombia": "BC",
+        "Nunavut": "NU",
+        "Northwest Territories": "NT",
+        "New Brunswick": "NB",
+        "Nova Scotia": "NS",
+        "Saskatchewan": "SK",
+        "Alberta": "AB",
+        "Prince Edward Island": "PE",
+        "Yukon Territory": "YT",
+        "Manitoba": "MB",
+        "Ontario": "ON"
+    }
+    
+    var colors = [
+        "#4285F4", // blue
+        "#EA4335", // red
+        "#FBBC05", // yellow
+        "#34A853",  // green
+    ];
+    
+    csv.forEach(function(el) {
+       el["ageGroups"] = age(el["Lower Age"], el["Upper Age"]); 
+    });
 
     // rendering the map
     var map = L.map('funding-map', {
-        center: [56.1304, -106.34],
+        center: [54.9641601681754, -90.4160163302575],
         zoom: 4,
-        minZoom: 3
+        minZoom: 3,
+        zoomControl: false
     });
-
+    
+    let selectedGender = "all";
+    let selectedAge = "all";
+    
     // my server is using Slava's domain because my own IP is blacklisted for phishing :(
-    L.tileLayer('http://test.knyazev.io/styles/klokantech-basic/{z}/{x}/{y}.png', {
+    L.tileLayer('https://test.knyazev.io/styles/klokantech-basic/{z}/{x}/{y}.png', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'
+    }).addTo(map);
+    
+    //add zoom control with your options
+    L.control.zoom({
+        position: 'bottomright'
     }).addTo(map);
 
     // create the SVG layer on top of the map
     L.svg().addTo(map);
     
-    // this array will hold the coordinates for every point
-    var coords = [];
-
+    function projectPoint(x, y){
+        var point = map.latLngToLayerPoint(new L.LatLng(y, x));
+        this.stream.point(point.x, point.y);
+    }
+    
+    // projecting the map
+    var transform = d3.geoTransform({point: projectPoint});
+    var path = d3.geoPath().projection(transform);
+    
+    d3.json("./data/canada.v2.json", function(geoJson) {
+        var provincePaths = d3.select("svg")
+        .selectAll(".province")
+        .data(geoJson.features)
+        .enter()
+        .append("g")
+        .attr("class", "province")
+        .attr("id", function(d) {
+            return provinceLookup[d.properties["name"]];
+        })
+        .style("fill", "#c51b8a")
+        .style("opacity", 0)
+        .append("path")
+        .attr("d", path);
+        
+        //update path after user done dragging or zooming
+        map.on("moveend", function() {
+            provincePaths.attr("d", path);
+        });
+    });
+    
+    document.getElementById("gender").value = "all";
+    
     // calculating the max value in order to properly scale the bar chart
-    // (the /g modifer means to replace all occurances)
-    var max = d3.max(data, function(d) {
+    // (the /g modifer replaces all occurances)
+    var max = d3.max(csv, function(d) {
         var amount = +d["Funding Amount"].replace("$", "").replace(/,/g, "");
         return amount;
     });
     
-    var target = d3.select("#funding-map")
-        .select("svg")
-        .select("g");
-    
-    // initializing the selected project
-    var selectedProject = null;
-    
-    for (var i = 0; i < data.length; i++) {
-        findLocation(data[i]["Headquarters"], function(coordinates) {
-            // adds the coordinates to draw
-            coords.push(new L.LatLng(coordinates[1] + Math.random() / 10, coordinates[0] + Math.random() / 10));
-            
-            target.selectAll('.headquarter').attr("display", "inline");
-            
-            // only execute at the last data point
-            if (coords.length == data.length) {
-                var circles = target.selectAll("circle")
-                    .data(data)
-                    .enter()
-                    .append("circle")
-                    .attr("id", function(d, i) {
-                        return "H" + i;
-                    })
-                    .attr("class", "headquarter")
-                    .style("fill", "#e74c3c")
-                    .attr("r", 10)
-                    .attr("opacity", 0)
-                    .attr("transform", function(d, k) {
-                        var point = map.latLngToLayerPoint(coords[k]);
-                        return "translate(" + point.x + "," + point.y + ")";
-                    })
-                    .attr("opacity", 1)
-                    .attr("pointer-events", "visible");
-                
-                reduceCollisions(target, max);
-                
-                // create the bar chart svg
-                d3.select("#amount")
-                    .append('svg')
-                    .attr('id', 'bar-chart')
-                    .attr('width', $("#amount").width())
-                    .attr("height", 50);
+    var xScale = d3.scaleLinear().domain([0, max]).range([0, $("#information").width()-200]);
+    var sortBy = "alphabet";
 
-                circles.on("mouseover", function(d) {
-                    document.getElementById("default").style.display = "none";
-                    
-                    document.getElementById('selection').innerHTML = '';
-                    
-                    var xScale = d3.scaleLinear()
-                            .range([0, $("#amount").width() - 150])
-                            .domain([0, max]);
-                    
-                    displayDetails(d, xScale);
-                    
-                    // d3.select(this)
-                    //     .style("fill", "#2980b9");
-                    
-                    // if (selectedProject == null) {
-                    //     document.getElementById("title").textContent = d["Project Name"];
-                    //     document.getElementById("description").textContent = d["Description"];
-
-                    //     var xScale = d3.scaleLinear()
-                    //         .range([0, $("#amount").width() - 150])
-                    //         .domain([0, max]);
-
-                    //     drawBar("#bar-chart", xScale, +d["Funding Amount"].replace("$", "").replace(",", "").replace(",", ""));
-
-                    //     // adding partners
-                    //     var partners = d["Partners"].split(/,|;/);
-
-                    //     var partnersDiv = document.getElementById("partners");
-                        
-                    //     partnersDiv.innerHTML = '<h4>Match Funding Partners</h4>';
-                        
-                    //     for (var i = 0; i < partners.length; i++) {
-                    //         partnersDiv.innerHTML += '<div class="partner" id="P' + i + '">' + partners[i].trim() + "</div>";
-                    //     }
-                    // }
-
+    function drawGroups(target, data) {
+        d3.selectAll(".intersection").remove();
+        
+        var intersection = d3.select(target)
+                .selectAll(".intersection")
+                .data(data)
+                .enter()
+                .append("g")
+                .attr("class", "intersection")
+                .attr("transform", function(d){
+                   return "translate(" + d.coordinates.x + "," + d.coordinates.y + ")"; 
                 });
 
-                circles.on("mouseout", function(d, i) {
-                    if (selectedProject != i)
-                        d3.select(this).style("fill", "#e74c3c");
-                });
-                
-                circles.on("click", function(d, i) {
-                    if (selectedProject == i) {
-                        selectedProject = null;
-                        d3.select(this).style("fill", "#e74c3c");
-                    } 
-                    else {
-                        d3.select("#H" + selectedProject).style("fill", "#2980b9");
-                        selectedProject = i;
+        intersection.append('circle')
+            .attr("pointer-events", "visible")
+            .style("fill", "#e74c3c")
+            .attr("r", 10)
+            .style("stroke-width", 0.5)
+            .style("stroke", "black");
 
-                        // adding partners
-                        var partners = d["Partners"].split(/,|;/);
-
-                        var partnersDiv = document.getElementById("partners");
-                        partnersDiv.innerHTML = '<h4>Match Funding Partners</h4>';
-                        
-                        for (var i = 0; i < partners.length; i++) {
-                            partnersDiv.innerHTML += '<div class="partner" id="P' + i + '">' + partners[i].trim() + "</div>";
-                        }
-                        
-                        d3.select(this).style("fill", "#2980b9");
-                        document.getElementById("title").textContent = d["Project Name"];
-                        document.getElementById("description").textContent = d["Description"];
-
-                        var xScale = d3.scaleLinear()
-                            .range([0, $("#amount").width() - 150])
-                            .domain([0, max]);
-
-                        // drawBar("#bar-chart", xScale, +d["Funding Amount"].replace("$", "").replace(",", "").replace(",", ""));
-                    }
-                });
-                
-                map.on("zoomend", function() {
-                    circles
-                        .attr("display", "inline")
-                        .attr("transform", function(d, k) {
-                        var point = map.latLngToLayerPoint(coords[k]);
-                        // console.log('doing');
-                        return "translate(" + point.x + "," + point.y + ")";
-                    });
-                    reduceCollisions(target);
-                });
-            }
-        });
+        intersection.append('text')
+            .attr("text-anchor", "middle")
+            .attr("y", 3)
+            .style("fill", "#fff")
+            .text(function(d){
+                return d.data.length;
+            });
     }
+    
+    var headquarters = d3.select("#funding-map")
+                    .select("svg")
+                    .select("g")
+                    .attr("id", "headquarters");
+
+    // summary stats
+    var formatter = d3.format(",");
+
+    // count up for number of projects
+    $("#projectCount").text(0);
+    var interval = setInterval(function() {
+    $("#projectCount").text(+($("#projectCount").text())+1);
+    
+    if ( $("#projectCount").text() == csv.length)
+        clearInterval(interval);
+    }, 15);
+
+    var average = d3.mean(csv, function(d) {
+        return +d["Funding Amount"].replace(/[,$]/g, ""); 
+    });
+
+    $("#average").text("$" + formatter(average));
+    
+    var sum = d3.sum(csv, function(d) {
+       return +d["Funding Amount"].replace(/[,$]/g, ""); 
+    });
+    
+    $("#totalAmount").text("$" + formatter(sum));
+    
+    // preprocess the data by adding the coordinates
+    addCoordinates(csv, function(data){
+        function positionCircles(d) {
+            var point = map.latLngToLayerPoint(d["coordinates"]);
+            return "translate(" + point.x + "," + point.y + ")";
+        };
+
+        function drawCircles(cleanData) {
+            return headquarters.selectAll("circle")
+                            .data(cleanData)
+                            .enter()
+                            .append("circle")
+                            .attr("id", function(d, i) {
+                                return "H" + i;
+                            })
+                            .attr("class", "headquarter")
+                            .attr("r", 10)
+                            .attr("cx", 0)
+                            .attr("cy", 0)
+                            .style("stroke-width", 0.5)
+                            .style("stroke", "black")
+                            .style("display", "inline")
+                            .attr("transform", positionCircles)
+                            .attr("pointer-events", "visible")
+                            .style("fill", "#e74c3c")
+                            .on("mouseover", function(d) {
+                                selectProject(d, xScale);
+                                
+                            }).on("mouseout", function(d) {
+                                d3.selectAll(".province").style("opacity", 0);
+                            });
+        }
+        
+        var circles = drawCircles(data);
+        var pageData = data;
+        
+        // sorting stuff
+        pageData =  pageData.sort(function(a, b) {
+            return d3.ascending(a["Project"], b["Project"]);
+        });
+        
+        renderData(pageData, colors, xScale);
+        
+        // groups circles together
+        drawGroups("svg", d3.circleCollision(circles, true));
+        
+        // repositioning the circles on zoom
+        map.on("zoom", function(){
+            d3.selectAll(".intersection").remove();
+
+            circles = d3.selectAll('.headquarter')
+                        .attr("transform", positionCircles)
+                        .style("display", "inline");
+            
+            drawGroups("svg", d3.circleCollision(circles, true));
+        });
+        
+        // filters
+        $("#gender").on("change", function(){
+           selectedGender = this.value;
+
+           pageData = filterByGender(data, selectedGender);
+           pageData = filterByAge(pageData, selectedAge);
+           
+           // redrawing the circles
+           d3.selectAll('.intersection').remove();
+           circles.remove();
+           circles = drawCircles(pageData);
+            drawGroups("svg", d3.circleCollision(circles, true));
+            
+            // I'll fix the formatting later :P
+              if (sortBy == "alphabet") {
+                pageData =  pageData.sort(function(a, b) {
+                   return d3.ascending(a["Project"], b["Project"]);
+                });
+              } else if (sortBy == "amount") {
+                pageData =  pageData.sort(function(a, b) {
+                   return d3.descending(+a["Funding Amount"].replace(/[,$]/g, ""), +b["Funding Amount"].replace(/[,$]/g, ""));
+                });
+              }
+          
+            // displays how many results
+            $("#results-count").text(pageData.length);
+            $('#results-plural').text(pageData.length == 1 ? "" : "s");
+            
+            // rendering the data
+            renderData(pageData, colors, xScale);
+        });
+        
+        $("#age").on("change", function() {
+            selectedAge = this.value;
+            pageData = filterByAge(data, selectedAge);
+            pageData = filterByGender(pageData, selectedGender);
+           
+           // redrawing the circles
+           d3.selectAll('.intersection').remove();
+           circles.remove();
+           circles = drawCircles(pageData);
+            drawGroups("svg", d3.circleCollision(circles, true));
+            
+            // I'll fix the formatting later :P
+              if (sortBy == "alphabet") {
+                pageData =  pageData.sort(function(a, b) {
+                   return d3.ascending(a["Project"], b["Project"]);
+                });
+              } else if (sortBy == "amount") {
+                pageData =  pageData.sort(function(a, b) {
+                   return d3.descending(+a["Funding Amount"].replace(/[,$]/g, ""), +b["Funding Amount"].replace(/[,$]/g, ""));
+                });
+              }
+          
+            // displays how many results
+            $("#results-count").text(pageData.length);
+            $('#results-plural').text(pageData.length == 1 ? "" : "s");
+            
+            // rendering the data
+            renderData(pageData, colors, xScale);
+        });
+        
+        $("#alphabeticalSort").on("click", function() {
+           sortBy = "alphabet";
+           pageData =  pageData.sort(function(a, b) {
+               return d3.ascending(a["Project"], b["Project"]);
+           });
+           
+           renderData(pageData, colors, xScale);
+           
+           $(".sort").removeClass("active");
+           $(this).addClass("active");
+        });
+        
+        $("#amountSort").on("click", function() {
+            sortBy = "amount";
+            pageData =  pageData.sort(function(a, b) {
+               return d3.descending(+a["Funding Amount"].replace(/[,$]/g, ""), +b["Funding Amount"].replace(/[,$]/g, ""));
+            });
+
+            renderData(pageData, colors, xScale);
+            $(".sort").removeClass("active");
+            $(this).addClass("active");
+        });
+    });
 });
 
-
-
-// Getting the data from google sheets (NOT PROVIDED FOR NOW)
+// Getting the data from google sheets (NOT PROVIDED FOR NOW) will add once the API is setup
 // var request = new XMLHttpRequest();
 // var API_KEY = "AIzaSyD0w5ErZNuAyG0yWLfUaJwxpKR-3SXPJq8";
 // var MAJOR_DIMENSION = "ROWS";
