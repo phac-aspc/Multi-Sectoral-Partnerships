@@ -32,12 +32,13 @@ function drawBar(target, xScale, value) {
                     el.text("$" + formatter(interpolator(t).toFixed(0)));
                 };
             })
-            .attr("x", function(d){return xScale(d["Funding Amount"].replace(/[,$]/g, "")) + 10;});
+            .attr("x", function(d){
+                return xScale(d["Funding Amount"].replace(/[,$]/g, "")) + 10;
+            });
 }
 
 function selectProject(data, xScale) {
     var selectionDiv = d3.select('#mainSelection').datum(data).html("");
-    console.log(selectionDiv);
     
     selectionDiv.append('h3').html(function(d) {
         return d["Project"];    
@@ -52,40 +53,38 @@ function selectProject(data, xScale) {
         });
     
     var affectedAreas = data["Delivery Location"].replace(/[" "]/g, "").split(",");
-    
-    for (var i=0;i<affectedAreas.length;i++){
-        d3.select("#" + affectedAreas[i]).style("opacity", 0.5);
+    if (affectedAreas[0].toLowerCase() != "all") {
+        for (var i=0;i<affectedAreas.length;i++){
+            d3.select("#" + affectedAreas[i]).style("opacity", 0.5);
+        }
+    } else {
+       d3.selectAll(".province").style("opacity", 0.5); 
     }
-}
-
-function details(data, xScale) {
-     for (var d=0;d<data.length; d++) {
-        var item = list
-            .datum(data[d])
-            .append('li')
-            .attr("id", "projectResult" + d)
-            .attr("class", "selected-project")
-            .style("padding-left", "10px");
+    
+    // partners div
+    var partners = data["Partners"].split(/[,;]/);
         
-        // adding the project title to the list item
-        item.append('h3')
-            .html(function(k) {
-                return k["Project"];
+    if (!(partners.length == 1 && partners[0] == "")) {
+        selectionDiv
+            .append('div')
+            .selectAll(".partner")
+            .data(partners)
+            .enter()
+            .append('div')
+            .attr('class', 'partner')
+            .html(function(d) {
+                return d;
             });
+    }
+       
+        selectionDiv.append("a")
+            .attr("href", function(d) {
+                return d['Website'];
+            })
+            .attr("target", "_blank")
+            .html("visit website");
+    
 
-        var amount = item.append('div')
-            .attr('class', 'amount');
-            
-        drawBar(amount, xScale, +data[d]["Funding Amount"].replace(/[,$]/g, ""));
-        // item.appendChild(amount);
-
-        // adding tyhe project purpose
-        item.append('p')
-            .html(function(k) {
-                console.log(k);
-                return k['Purpose of Project']; 
-            });
-     }
 }
 
 function template(data, colors, xScale) {
@@ -97,7 +96,7 @@ function template(data, colors, xScale) {
             .append('li')
             .attr("id", "projectResult" + d)
             .attr("class", "project")
-            .style("border-left", "5px solid" + colors[d])
+            .style("border-left", "5px solid " + colors[d])
             .style("padding-left", "10px");
         
         // adding the project title to the list item
@@ -110,52 +109,78 @@ function template(data, colors, xScale) {
             .attr('class', 'amount');
             
         drawBar(amount, xScale, +data[d]["Funding Amount"].replace(/[,$]/g, ""));
-        // item.appendChild(amount);
-
-        // adding tyhe project purpose
+        
+        item.append('p')
+            .html(
+                function(d) {
+                    var monthNames = [
+                        "January", "February", "March",
+                        "April", "May", "June", "July",
+                        "August", "September", "October",
+                        "November", "December"
+                    ];
+                    var startDate = new Date(d['Project Start Date']);
+                    var endDate = new Date(d['Project End Date']);
+                    
+                    return monthNames[startDate.getMonth()] + " " + startDate.getFullYear() + " to " + monthNames[endDate.getMonth()] + " " + endDate.getFullYear();
+                }
+            );
+        
+        item.append('p')
+            .html(function(d) {
+                return 'Gender: ' + d['Gender'];  
+            });
+        
+        // adding the project purpose
         item.append('p')
             .html(function(k) {
-                console.log(k);
                 return k['Purpose of Project']; 
             });
-
-        // var description = document.createElement("p");
-        // description.textContent = data[d]['Purpose of Project'];
-        // item.appendChild(description);
-
+        
         // partners div
-        // var partners = data[d]["Partners"].split(/[,;]/);
-     
-        // if (!(partners.length == 1 && partners[0] == "")) {
-            
-        //     var partnersDiv = document.createElement('details');
-        //     partnersDiv.setAttribute("class", "acc-group off wb-lbx");
-            
-            
-        //     var partnersTitle = document.createElement('summary');
-        //     partnersTitle.textContent = 'Partners';
-        //     partnersTitle.setAttribute("class", "tgl-tab wb-init wb-toggle-inited");
-            
-        //     partnersDiv.appendChild(partnersTitle);
-            
-        //     for (var p=0;p<partners.length;p++){
-        //         var partnerBox = document.createElement('div');
-        //         partnerBox.setAttribute('class', 'partner');
-        //         partnerBox.textContent = partners[p];
-        //         partnersDiv.appendChild(partnerBox);
-        //     }
-            
-        //     item.appendChild(partnersDiv);
-        // }
+        var partners = data[d]["Partners"].split(/[,;]/);
+        
+        if (!(partners.length == 1 && partners[0] == "")) {
+            var details = item.append("details")
+                .attr("class", "acc-group off wb-lbx");
+        
+            details.append("summary")
+                .html('Match Funding Partners')
+                .attr("class", "tgl-tab wb-init wb-toggle-inited");
+    
+            details.selectAll(".partner")
+                .data(partners)
+                .enter()
+                .append('div')
+                .attr('class', 'partner')
+                .html(function(d) {
+                    return d;
+                });
+        }
        
+        item.append("a")
+            .attr("href", function(d) {
+                return d['Website'];
+            })
+            .attr("target", "_blank")
+            .html("visit website");
         
-        // var link = document.createElement("a");
-        // link.setAttribute("href", data[d]['Website']);
-        // link.setAttribute("target", "_blank");
-        // link.textContent = data[d]["Website"];
-        // item.appendChild(link);
+        item.on("mouseover", function(d) {
+            
+
+            var affectedAreas = d["Delivery Location"].replace(/[" "]/g, "").split(",");
+            if (affectedAreas[0].toLowerCase() != "all") {
+                for (var i=0;i<affectedAreas.length;i++){
+                    d3.select("#" + affectedAreas[i]).style("opacity", 0.5);
+                }
+            } else {
+               d3.selectAll(".province").style("opacity", 0.5); 
+            }  
+        });
         
-        // list.appendChild(item);
+        item.on("mouseout", function(d) {
+            d3.selectAll(".province").style("opacity", 0);
+        });
     }
 }
 
@@ -166,6 +191,9 @@ function addCoordinates(pointsToProcess, callback){
         request.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
                 var data = JSON.parse(request.responseText);
+                if (data[0] == undefined) {
+                    console.log(point);
+                }
                 var coordinates = data[0].geometry.coordinates;
                 point.coordinates = new L.LatLng(coordinates[1], coordinates[0]);
                 callback(point);
@@ -213,6 +241,7 @@ function renderData(data, colors, xScale, map) {
 function age(lowerBound, upperBound) {
     lowerBound = lowerBound == "All" ? 0 : +lowerBound;
     upperBound = upperBound == "All" ? 300 : +upperBound;
+    
     let ageGroups = {
         "infants": {
             "lower": 0,
@@ -236,9 +265,12 @@ function age(lowerBound, upperBound) {
         }
     };
     
-    let results = [];
-    for (let ageGroup of Object.keys(ageGroups)) {
-        let group = ageGroups[ageGroup];
+    var results = [];
+    var keys = Object.keys(ageGroups);
+    
+    for (var i=0;i<keys.length;i++) {
+        var ageGroup = keys[i];
+        var group = ageGroups[ageGroup];
         
         if (lowerBound >= group["lower"] && lowerBound <= group["higher"])
             results.push(ageGroup);
@@ -260,13 +292,24 @@ function filterByAge(data, age) {
 
 function filterByGender(data, gender) {
     let filteredData = data.filter(function(el) {
-        return el["Gender"].toLowerCase() == gender || el["Gender"].toLowerCase() == "all" || gender.toLowerCase() == "all";
+        if (gender == "all")
+            return true;
+        return el["Gender"].toLowerCase() == gender;
     });
     
     return filteredData;
 }
 
-d3.csv("./data/partnerships_v5.csv", function(csv) {
+function filterByIntervention(data, type) {
+    let filteredData = data.filter(function(el) {
+        if (type == "all")
+            return true;
+        return el["Intervention Type"].toLowerCase() == type;
+    });
+    return filteredData;
+}
+
+d3.csv("./data/partnerships_v10.csv", function(csv) {
     var provinceLookup = {
         "Quebec": "QC",
         "Newfoundland and Labrador": "NL",
@@ -281,7 +324,7 @@ d3.csv("./data/partnerships_v5.csv", function(csv) {
         "Yukon Territory": "YT",
         "Manitoba": "MB",
         "Ontario": "ON"
-    }
+    };
     
     var colors = [
         "#4285F4", // blue
@@ -289,6 +332,20 @@ d3.csv("./data/partnerships_v5.csv", function(csv) {
         "#FBBC05", // yellow
         "#34A853",  // green
     ];
+    var interventionTypes = [];
+    
+    csv.forEach(function(el) {
+       if (!interventionTypes.includes(el["Intervention Type"])) {
+           interventionTypes.push(el["Intervention Type"]);
+       } 
+    });
+    
+    interventionTypes.forEach(function(type) {
+        d3.select('#interventionType')
+            .append('option')
+            .attr('value', type.toLowerCase())
+            .html(type);
+    });
     
     csv.forEach(function(el) {
        el["ageGroups"] = age(el["Lower Age"], el["Upper Age"]); 
@@ -302,9 +359,10 @@ d3.csv("./data/partnerships_v5.csv", function(csv) {
         zoomControl: false
     });
     
-    let selectedGender = "all";
-    let selectedAge = "all";
-    
+    var selectedGender = "all";
+    var selectedAge = "all";
+    var selectedIntervention = "all";
+
     // my server is using Slava's domain because my own IP is blacklisted for phishing :(
     L.tileLayer('https://test.knyazev.io/styles/klokantech-basic/{z}/{x}/{y}.png', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'
@@ -318,6 +376,10 @@ d3.csv("./data/partnerships_v5.csv", function(csv) {
     // create the SVG layer on top of the map
     L.svg().addTo(map);
     
+    d3.select("svg")
+        .append("g")
+        .attr("id","provinceGroup");
+
     function projectPoint(x, y){
         var point = map.latLngToLayerPoint(new L.LatLng(y, x));
         this.stream.point(point.x, point.y);
@@ -328,7 +390,7 @@ d3.csv("./data/partnerships_v5.csv", function(csv) {
     var path = d3.geoPath().projection(transform);
     
     d3.json("./data/canada.v2.json", function(geoJson) {
-        var provincePaths = d3.select("svg")
+        var provincePaths = d3.select("#provinceGroup")
         .selectAll(".province")
         .data(geoJson.features)
         .enter()
@@ -391,9 +453,8 @@ d3.csv("./data/partnerships_v5.csv", function(csv) {
     
     var headquarters = d3.select("#funding-map")
                     .select("svg")
-                    .select("g")
+                    .append("g")
                     .attr("id", "headquarters");
-
     // summary stats
     var formatter = d3.format(",");
 
@@ -410,7 +471,7 @@ d3.csv("./data/partnerships_v5.csv", function(csv) {
         return +d["Funding Amount"].replace(/[,$]/g, ""); 
     });
 
-    $("#average").text("$" + formatter(average));
+    $("#average").text("$" + formatter(Math.floor(average)));
     
     var sum = d3.sum(csv, function(d) {
        return +d["Funding Amount"].replace(/[,$]/g, ""); 
@@ -423,7 +484,7 @@ d3.csv("./data/partnerships_v5.csv", function(csv) {
         function positionCircles(d) {
             var point = map.latLngToLayerPoint(d["coordinates"]);
             return "translate(" + point.x + "," + point.y + ")";
-        };
+        }
 
         function drawCircles(cleanData) {
             return headquarters.selectAll("circle")
@@ -478,10 +539,9 @@ d3.csv("./data/partnerships_v5.csv", function(csv) {
         // filters
         $("#gender").on("change", function(){
            selectedGender = this.value;
-
            pageData = filterByGender(data, selectedGender);
            pageData = filterByAge(pageData, selectedAge);
-           
+           pageData = filterByIntervention(pageData, selectedIntervention);
            // redrawing the circles
            d3.selectAll('.intersection').remove();
            circles.remove();
@@ -511,7 +571,39 @@ d3.csv("./data/partnerships_v5.csv", function(csv) {
             selectedAge = this.value;
             pageData = filterByAge(data, selectedAge);
             pageData = filterByGender(pageData, selectedGender);
-           
+            pageData = filterByIntervention(pageData, selectedIntervention);
+           // redrawing the circles
+           d3.selectAll('.intersection').remove();
+           circles.remove();
+           circles = drawCircles(pageData);
+            drawGroups("svg", d3.circleCollision(circles, true));
+            
+            // I'll fix the formatting later :P
+              if (sortBy == "alphabet") {
+                pageData =  pageData.sort(function(a, b) {
+                   return d3.ascending(a["Project"], b["Project"]);
+                });
+              } else if (sortBy == "amount") {
+                pageData =  pageData.sort(function(a, b) {
+                   return d3.descending(+a["Funding Amount"].replace(/[,$]/g, ""), +b["Funding Amount"].replace(/[,$]/g, ""));
+                });
+              }
+          
+            // displays how many results
+            $("#results-count").text(pageData.length);
+            $('#results-plural').text(pageData.length == 1 ? "" : "s");
+            
+            // rendering the data
+            renderData(pageData, colors, xScale);
+        });
+        
+        $("#interventionType").on("change", function() {
+            selectedIntervention = this.value;
+            
+            pageData = filterByIntervention(data, selectedIntervention);
+            pageData = filterByAge(pageData, selectedAge);
+            pageData = filterByGender(pageData, selectedGender);
+    
            // redrawing the circles
            d3.selectAll('.intersection').remove();
            circles.remove();

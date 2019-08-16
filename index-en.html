@@ -153,6 +153,20 @@
         .selection {
             margin: 20px 0;
         }
+        
+        img {
+            max-width: 200px;
+            margin-right: 10px;
+        }
+        
+        main {
+            margin-bottom: 20px;
+        }
+        
+        #legend {
+            background-color: #c51b8a;
+            color: black;
+        }
     </style>
 </head>
 
@@ -226,20 +240,20 @@
         </nav>
     </header>
     <main property="mainContentOfPage" class="container">
-        <section class="alert alert-warning">
-            <h3>In development</h3>
-            <p> Some features may not be stable or functioning while this project is in the development stage</p>
-        </section>
-        <h1>Multi-Sectoral Partnerships <sup>Prototype</sup></h1>
+        <!--<section class="alert alert-warning">-->
+        <!--    <h3>Beta version</h3>-->
+        <!--    <p>Some features may not be stable or functioning while this project is in the development stage</p>-->
+        <!--</section>-->
+        <h1>Multi-Sectoral Partnerships to Promote Healthy Living and Prevent Chronic Disease<sup>Beta</sup></h1>
        <div class="row">
             <div class="col-lg-8 col-md-12" id="blog">
-            <p>
-                Lorem ipsum dolor sit amet, his no fastidii voluptatum theophrastus, ius et inani necessitatibus. Nec agam labitur interesset ei. Eius aeterno euismod ei quo, essent possim debitis ut sed, an iisque noluisse imperdiet qui. Id sed paulo imperdiet percipitur.
-    
-                In affert apeirian lucilius vix, odio audiam pri ne. Possit sensibus voluptaria mea te, no pri elit doming euismod. Probo lobortis instructior usu te, doming vulputate at quo, altera saperet impedit vis et. Sonet impedit deterruisset eam ut, ea vim amet perpetua consequat.
-                
-                Ne eros graece recteque pro, te tacimates consequat democritum his, nec ne enim congue viderer. Dicat adipisci quaerendum id vix. Blandit imperdiet sed ei. Eum reque omnes eu, viris assentior accommodare ex quo, rebum probatus sit ne.
-             </p>
+                <p>
+                    <img src="healthnosmoke.png" alt="No smoking, man running and apple" align="left">
+                    Canada recognises that chronic diseases such as cancer, diabetes and cardiovascular disease are among the leading causes of death and reduced quality of life. Several common risk factors that contribute to chronic disease include physical inactivity and/or sedentary behaviour, unhealthy eating, smoking and harmful use of alcohol.
+                </p>
+                <p>Through the <a href="https://www.canada.ca/en/public-health/services/funding-opportunities/multi-sectoral-partnerships-promote-healthy-living-prevent-chronic-disease.html" target="_blank">Multi-sectoral Partnerships to Promote Healthy Living and Prevent Chronic Disease program</a>, PHAC invests invests about $20 million annually in projects that test or scale innovative ideas to encourage behaviour changes that will positively impact the health of Canadians.</p>
+                <p>This interactive map provides information about currently funded projects, such as purpose, location and target population.</p>
+                <p>If you have any questions or would like to know more about the Multi-sectoral Partnerships to Promote Healthy Living and Prevent Chronic Disease program please contact: <a href="mailto:phac.psd-dps.aspc@canada.ca">phac.psd-dps.aspc@canada.ca</a></p>
             </div>
             
             <div class="col-lg-4 col-md-12 alert alert-info" id="summary">
@@ -248,7 +262,7 @@
                    Number of projects: <span class="summary-stat" id="projectCount"></span>
                 </div>
                 <div>
-                    Total amount funded: <span class="summary-stat" id="totalAmount"></span>
+                    Total amount leveraged: <span class="summary-stat" id="totalAmount"></span>
                 </div>
                 <div>
                     Average: <span class="summary-stat" id="average"></span>
@@ -273,7 +287,7 @@
                         <i class="fas fa-dollar-sign"></i>
                     </button>
                 </div>
-                <br>
+                <hr>
                 <label for="age">Age</label>
                 <select class="form-control" id="age">
                     <option value="all" selected>all</option>
@@ -289,6 +303,12 @@
                     <option value="all" selected>all</option>
                     <option value="male">male</option>
                     <option value="female">female</option>
+                    <option value="neutral">other</option>
+                </select>
+                <br>
+                <label for="interventionType">Intervention</label>
+                <select class="form-control" id="interventionType">
+                    <option value="all" selected>all</option>    
                 </select>
             </div>
             <div id="information" class="col-lg-10 col-md-12 col-sm-12">
@@ -344,10 +364,12 @@
     <script src="./wet-boew/js/wet-boew.min.js"></script>
     <script src="./GCWeb/js/theme.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-
+    
+    <script crossorigin="anonymous" src="https://polyfill.io/v3/polyfill.min.js?features=Object.keys%2CObject.assign%2CArray.prototype.includes"></script>
     <!-- D3 -->
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="https://d3js.org/topojson.v1.min.js"></script>
+
     <!--<script type="text/javascript" src="./dependencies/d3-circleCollision.min.js"></script>-->
     <script type="text/javascript" src="./d3-circleCollision.min.js"></script>
     <!-- map stuff --> 
@@ -355,7 +377,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.min.js"></script>
 
     <!-- My scripts -->
-    <script src="./js/charts/barchart.js"></script>
     <script src="./js/tools/geotool.js"></script>
     <script src="./js/tools/misc.js"></script>
     <script src="./js/index.js"></script>
